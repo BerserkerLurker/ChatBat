@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "159134343335",
+    "firebase_url": "https://chatbat-9bff1.firebaseio.com",
+    "project_id": "chatbat-9bff1",
+    "storage_bucket": "chatbat-9bff1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159134343335:android:32dc5f942b9386e3",
+        "android_client_info": {
+          "package_name": "com.dev.kallinikos.chatbat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "159134343335-h3pp2ftqjr79m100ph99c1dt4n6nage3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dev.kallinikos.chatbat",
+            "certificate_hash": "a874893270f25ad05e884d0783718f9399b5bd66"
+          }
+        },
+        {
+          "client_id": "159134343335-4udrqholbsbojgpf9n04khh9ira8d9bk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu9fXNMLEHtbdyqrq0HoxMI8Ux5PRvuEs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "159134343335-4udrqholbsbojgpf9n04khh9ira8d9bk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ChatBat</string>
+    <string name="need_a_new_account">NEED A NEW ACCOUNT?</string>
+    <string name="display_name">Display Name</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="create_account">CREATE ACCOUNT</string>
+    <string name="log_out">Log Out</string>
+    <string name="login">Login</string>
+    <string name="your_email">Your Email</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
