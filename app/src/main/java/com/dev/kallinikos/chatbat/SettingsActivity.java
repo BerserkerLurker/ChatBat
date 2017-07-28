@@ -2,6 +2,7 @@ package com.dev.kallinikos.chatbat;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -26,10 +27,15 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 
-import java.net.URI;
-import java.util.Random;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import id.zelory.compressor.Compressor;
 
 public class SettingsActivity extends AppCompatActivity {
     // DB Firebase
@@ -79,7 +85,10 @@ public class SettingsActivity extends AppCompatActivity {
 
                 mName.setText(name);
                 mStatus.setText(status);
-                Picasso.with(SettingsActivity.this).load(image).into(mImage);
+
+                if(!image.equals("default")) {
+                    Picasso.with(SettingsActivity.this).load(image).placeholder(R.drawable.profile).into(mImage);
+                }
             }
 
             @Override
@@ -138,9 +147,28 @@ public class SettingsActivity extends AppCompatActivity {
 
                 Uri resultUri = result.getUri();
 
+                File thumbFileFromPath = new File(resultUri.getPath());
+
                 String currentUid = mCurrentUser.getUid();
 
+                Bitmap  thumbBitmap = null;
+                try {
+                    thumbBitmap = new Compressor(this)
+                            .setMaxHeight(200)
+                            .setMaxWidth(200)
+                            .setQuality(75)
+                            .compressToBitmap(thumbFileFromPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                thumbBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                final byte[] thumbByte = baos.toByteArray();
+
                 StorageReference filepath  = mImageStorage.child("profile_imgs").child(currentUid + ".jpg");
+                final StorageReference thumbFilePath = mImageStorage.child("profile_imgs").child("thumbs").child(currentUid + ".jpg");
 
 
 
@@ -149,18 +177,43 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()){
-                            String downloadUrl = task.getResult().getDownloadUrl().toString();
+                            final String downloadUrl = task.getResult().getDownloadUrl().toString();
 
-                            mUserDatabase.child("image").setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            // thumbImg upload task
+                            UploadTask uploadTask = thumbFilePath.putBytes(thumbByte);
+                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                 @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()){
-                                        mProgDialog.dismiss();
-                                        Toast.makeText(SettingsActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumbTask) {
 
+                                    String thumbDownloadUrl = thumbTask.getResult().getDownloadUrl().toString();
+
+                                    if(thumbTask.isSuccessful()){
+
+                                        Map updateHashMap = new HashMap();
+                                        updateHashMap.put("image", downloadUrl);
+                                        updateHashMap.put("thumb_image", thumbDownloadUrl);
+
+                                        mUserDatabase.updateChildren(updateHashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()){
+                                                    mProgDialog.dismiss();
+                                                    Toast.makeText(SettingsActivity.this, "Success", Toast.LENGTH_SHORT).show();
+
+                                                }
+                                            }
+                                        });
+
+                                    }else{
+                                        Toast.makeText(SettingsActivity.this, "Upload thumbnail Error", Toast.LENGTH_SHORT).show();
+                                        mProgDialog.dismiss();
                                     }
+
                                 }
                             });
+
+
+
 
                         }else{
                             Toast.makeText(SettingsActivity.this, "Upload Error", Toast.LENGTH_SHORT).show();
