@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -93,6 +94,12 @@ public class FriendsFragment extends Fragment {
                         String userName = dataSnapshot.child("name").getValue().toString();
                         String userThumb = dataSnapshot.child("thumb_image").getValue().toString();
 
+                        if(dataSnapshot.hasChild("online")) {
+                            Boolean userOnline = (Boolean)dataSnapshot.child("online").getValue();
+                            friendsViewHolder.setUserOnline(userOnline);
+                        }
+
+
                         friendsViewHolder.setName(userName);
                         friendsViewHolder.setUserImage(userThumb, getContext());
                     }
@@ -132,6 +139,18 @@ public class FriendsFragment extends Fragment {
         public void setUserImage(String thumbImage, Context ctx){
             CircleImageView userImageView = (CircleImageView)mView.findViewById(R.id.users_single_img);
             Picasso.with(ctx).load(thumbImage).placeholder(R.drawable.profile).into(userImageView);
+
+        }
+
+        public void setUserOnline(boolean onlineStatus){
+
+            ImageView userOnlineView =(ImageView)mView.findViewById(R.id.users_single_online_icon);
+
+            if(onlineStatus){
+                userOnlineView.setVisibility(View.VISIBLE);
+            }else {
+                userOnlineView.setVisibility(View.INVISIBLE);
+            }
 
         }
     }

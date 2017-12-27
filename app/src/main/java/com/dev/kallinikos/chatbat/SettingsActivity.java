@@ -135,6 +135,24 @@ public class SettingsActivity extends AppCompatActivity {
 
     }
 
+    // TODO: online not functioning correctly
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+            mUserDatabase.child("online").setValue(true);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        mUserDatabase.child("online").setValue(false);
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -11,9 +11,13 @@ import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+
+    private DatabaseReference mUserRef;
 
     private Toolbar mToolbar;
 
@@ -39,11 +43,14 @@ public class MainActivity extends AppCompatActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
 
         mTabLayout = (TabLayout)findViewById(R.id.main_tabs);
         mTabLayout.setupWithViewPager(mViewPager);
     }
 
+
+    // TODO: online not functioning correctly
     @Override
     public void onStart(){
         super.onStart();
@@ -53,8 +60,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (currentUser == null){
             sendToStart();
+        }else {
+            mUserRef.child("online").setValue(true);
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mUserRef.child("online").setValue(false);
+    }
+
+
 
     private void sendToStart() {
         Intent startIntent = new Intent(MainActivity.this, StartActivity.class);

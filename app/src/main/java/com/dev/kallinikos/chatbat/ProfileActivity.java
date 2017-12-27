@@ -287,4 +287,22 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
     }
+
+
+    // TODO: online not functioning correctly
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if(mCurrentUser != null){
+            mRootRef.child("Users").child(mCurrentUser.getUid()).child("online").setValue(true);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mRootRef.child("Users").child(mCurrentUser.getUid()).child("online").setValue(false);
+
+    }
 }
