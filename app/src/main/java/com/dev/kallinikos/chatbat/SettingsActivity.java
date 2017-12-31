@@ -140,8 +140,9 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
+        if (mCurrentUser != null) {
             mUserDatabase.child("online").setValue(true);
+        }
 
     }
 
@@ -149,7 +150,9 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        mUserDatabase.child("online").setValue(false);
+        if (mCurrentUser != null) {
+            mUserDatabase.child("online").setValue(false);
+        }
 
     }
 

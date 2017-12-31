@@ -302,7 +302,9 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mRootRef.child("Users").child(mCurrentUser.getUid()).child("online").setValue(false);
+        if (mCurrentUser != null) {
+            mRootRef.child("Users").child(mCurrentUser.getUid()).child("online").setValue(false);
+        }
 
     }
 }
