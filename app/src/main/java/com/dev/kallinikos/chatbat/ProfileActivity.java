@@ -102,16 +102,16 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        if(dataSnapshot.hasChild(userId)){
+                        if (dataSnapshot.hasChild(userId)) {
                             String reqType = dataSnapshot.child(userId).child("request_type").getValue().toString();
-                            if(reqType.equals("received")){
+                            if (reqType.equals("received")) {
                                 mCurrentState = "req_received";
                                 mProfileSendRequestBtn.setText("Accept Friend Request");
 
                                 mDeclineBtn.setVisibility(View.VISIBLE);
                                 mDeclineBtn.setEnabled(true);
 
-                            }else if(reqType.equals("sent")){
+                            } else if (reqType.equals("sent")) {
                                 mCurrentState = "req_sent";
                                 mProfileSendRequestBtn.setText("Cancel Friend Request");
 
@@ -120,11 +120,11 @@ public class ProfileActivity extends AppCompatActivity {
                             }
 
                             mProgress.dismiss();
-                        }else{
+                        } else {
                             mFriendDB.child(mCurrentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.hasChild(userId)){
+                                    if (dataSnapshot.hasChild(userId)) {
                                         mCurrentState = "friends";
                                         mProfileSendRequestBtn.setText("Unfriend this Person");
 
@@ -142,7 +142,6 @@ public class ProfileActivity extends AppCompatActivity {
                         }
 
 
-
                     }
 
                     @Override
@@ -150,8 +149,9 @@ public class ProfileActivity extends AppCompatActivity {
 
                     }
                 });
-
             }
+
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {

@@ -94,51 +94,53 @@ public class FriendsFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        final String userName = dataSnapshot.child("name").getValue().toString();
-                        String userThumb = dataSnapshot.child("thumb_image").getValue().toString();
+                        if (dataSnapshot.hasChildren()) {
+                            final String userName = dataSnapshot.child("name").getValue().toString();
+                            String userThumb = dataSnapshot.child("thumb_image").getValue().toString();
 
-                        if(dataSnapshot.hasChild("online")) {
-                            Boolean userOnline = (Boolean)dataSnapshot.child("online").getValue();
-                            friendsViewHolder.setUserOnline(userOnline);
-                        }
-
-
-                        friendsViewHolder.setName(userName);
-                        friendsViewHolder.setUserImage(userThumb, getContext());
-
-                        friendsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-
-                                CharSequence options[] = new CharSequence[]{"Open profile", "Send message"};
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-
-                                builder.setTitle("Select options");
-                                builder.setItems(options, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        // Click events for options
-                                        if (i == 0){
-                                            Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
-                                            profileIntent.putExtra("userid", list_user_id);
-                                            startActivity(profileIntent);
-
-                                        }
-
-                                        if (i == 1){
-                                            Intent chatIntent = new Intent(getContext(), ChatActivity.class);
-                                            chatIntent.putExtra("userid", list_user_id);
-                                            chatIntent.putExtra("username", userName);
-                                            startActivity(chatIntent);
-                                        }
-
-                                    }
-                                });
-
-                                builder.show();
+                            if (dataSnapshot.hasChild("online")) {
+                                String userOnline = dataSnapshot.child("online").getValue().toString();
+                                friendsViewHolder.setUserOnline(userOnline);
                             }
-                        });
+
+
+                            friendsViewHolder.setName(userName);
+                            friendsViewHolder.setUserImage(userThumb, getContext());
+
+                            friendsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    CharSequence options[] = new CharSequence[]{"Open profile", "Send message"};
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                                    builder.setTitle("Select options");
+                                    builder.setItems(options, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            // Click events for options
+                                            if (i == 0) {
+                                                Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
+                                                profileIntent.putExtra("userid", list_user_id);
+                                                startActivity(profileIntent);
+
+                                            }
+
+                                            if (i == 1) {
+                                                Intent chatIntent = new Intent(getContext(), ChatActivity.class);
+                                                chatIntent.putExtra("userid", list_user_id);
+                                                chatIntent.putExtra("username", userName);
+                                                startActivity(chatIntent);
+                                            }
+
+                                        }
+                                    });
+
+                                    builder.show();
+                                }
+                            });
+                        }
                     }
 
                     @Override
@@ -179,11 +181,11 @@ public class FriendsFragment extends Fragment {
 
         }
 
-        public void setUserOnline(boolean onlineStatus){
+        public void setUserOnline(String onlineStatus){
 
             ImageView userOnlineView =(ImageView)mView.findViewById(R.id.users_single_online_icon);
 
-            if(onlineStatus){
+            if(onlineStatus.equals("true")){
                 userOnlineView.setVisibility(View.VISIBLE);
             }else {
                 userOnlineView.setVisibility(View.INVISIBLE);
