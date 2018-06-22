@@ -5,16 +5,25 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -30,6 +39,13 @@ public class ChatActivity extends AppCompatActivity {
     private TextView mTitleView;
     private TextView mLastSeenView;
     private CircleImageView mProfileImage;
+
+    private FirebaseAuth mAuth;
+    private String mCurrentUserId;
+
+    private ImageButton mChatAddBtn;
+    private ImageButton mChatSendBtn;
+    private EditText mChatMessageView;
 
 
     @Override
@@ -47,6 +63,9 @@ public class ChatActivity extends AppCompatActivity {
 
 
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUserId = mAuth.getCurrentUser().getUid();
+
 
         mChatUser = getIntent().getStringExtra("userid");
         mUserName = getIntent().getStringExtra("username");
@@ -64,6 +83,10 @@ public class ChatActivity extends AppCompatActivity {
         mLastSeenView = (TextView) findViewById(R.id.custom_bar_seen);
         mProfileImage = (CircleImageView) findViewById(R.id.custom_bar_image);
 
+        mChatAddBtn = (ImageButton) findViewById(R.id.chatAddBtn);
+        mChatSendBtn = (ImageButton) findViewById(R.id.chatSendBtn);
+        mChatMessageView = (EditText) findViewById(R.id.chatMsgView);
+
         mTitleView.setText(mUserName);
 
         mRootRef.child("Users").child(mChatUser).addValueEventListener(new ValueEventListener() {
@@ -76,7 +99,14 @@ public class ChatActivity extends AppCompatActivity {
                 if (online.equals("true")){
                     mLastSeenView.setText("Online");
                 }else {
-                    mLastSeenView.setText(online);
+
+                    GetTimeAgo getTimeAgo = new GetTimeAgo();
+
+                    long lastTime = Long.parseLong(online);
+
+                    String lastSeenTime = getTimeAgo.getTimeAgo(lastTime, getApplicationContext());
+
+                    mLastSeenView.setText(lastSeenTime);
                 }
 
             }
@@ -87,5 +117,77 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        mRootRef.child("Chat").child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (!dataSnapshot.hasChild(mChatUser)){
+
+                    Map chatAddMap = new HashMap();
+                    chatAddMap.put("seen", false);
+                    chatAddMap.put("timestamp", ServerValue.TIMESTAMP);
+
+                    Map chatUserMap = new HashMap();
+                    chatUserMap.put("Chat/" + mCurrentUserId + "/" + mChatUser, chatAddMap);
+                    chatUserMap.put("Chat/" + mChatUser + "/" + mCurrentUserId, chatAddMap);
+
+                    mRootRef.updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                            if (databaseError != null){
+                                Log.d("Chat Log", databaseError.getMessage());
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        mChatSendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendMessage();
+            }
+        });
+
+    }
+
+    private void sendMessage() {
+
+        String message = mChatMessageView.getText().toString();
+
+        String currentUserRef = "messages/" + mCurrentUserId + "/" + mChatUser;
+        String chatUserRef = "messages/" + mChatUser + "/" + mCurrentUserId;
+
+        DatabaseReference userMessagePush = mRootRef.child("messages").child(mCurrentUserId).child(mChatUser).push();
+
+        String pushId = userMessagePush.getKey();
+
+        if(!TextUtils.isEmpty(message)){
+            Map messageMap = new HashMap();
+            messageMap.put("message", message);
+            messageMap.put("seen", false);
+            messageMap.put("type", "text");
+            messageMap.put("time", ServerValue.TIMESTAMP);
+
+            Map messageUserMap = new HashMap();
+            messageUserMap.put(currentUserRef+ "/" + pushId, messageMap);
+            messageUserMap.put(chatUserRef+ "/" + pushId, messageMap);
+
+            mRootRef.updateChildren(messageUserMap, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    if (databaseError != null){
+                        Log.d("Chat Log", databaseError.getMessage());
+                    }
+                }
+            });
+        }
     }
 }
